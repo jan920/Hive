@@ -2,7 +2,7 @@ from board.globals import FREE_SPACE, PLACEHOLDER
 
 
 class Game:
-    def __init__(self, turn=1, size=68, board=None, placed_stones=[]):
+    def __init__(self, turn=1, size=68, board = None, placed_stones=[]):
         self.turn = turn
         self.size = size
         if board:
@@ -12,80 +12,65 @@ class Game:
         self.placed_stones = placed_stones
 
     def __str__(self):
-        def find_first_stone_from_top(self):
-            top = 0
+        def find_first_stone_from_top():
             for y in range(self.size):
-                for x in self.board[y]:
-                    if x is not PLACEHOLDER or x is not FREE_SPACE:
-                        top = y
-                        break
-                if top != 0:
-                    break
-            return top
+                for item in self.board[y]:
+                    if item is not PLACEHOLDER or item is not FREE_SPACE:
+                        return y
+            return 0
 
-        def find_first_bottom(self):
-            bottom = self.size-1
+        def find_first_stone_from_bottom():
             for y in reversed(range(self.size)):
-                for stone in self.placed_stones:
-                    if stone in self.board[y]:
-                        bottom = y
-                        break
-                if bottom != self.size - 1:
-                    break
-            return bottom
+                for item in self.board[y]:
+                    if item is not PLACEHOLDER or item is not FREE_SPACE:
+                        return y
+            return self.size - 1
 
-        def find_first_left_right(self, top, bottom):
+        def find_first_left_right(top, bottom):
             left = self.size
             right = 0
             for y in range(top, bottom + 1):
-                for x in range(self.size):
-                    if self.board[y][x] != PLACEHOLDER and self.board[y][x] != FREE_SPACE:
-                        if x < left:
-                            left = x
-                        if x > right:
-                            right = x
+                for counter, item in enumerate(self.board[y]):
+                    if item is not PLACEHOLDER and item is not FREE_SPACE:
+                        if counter < left:
+                            left = counter
+                        if counter > right:
+                            right = counter
             return left, right
 
-        top = find_first_top(self)
+        top = find_first_stone_from_top()
 
-        bottom = find_first_bottom(self)
+        bottom = find_first_stone_from_bottom()
 
-        left, right = find_first_left_right(self, top, bottom)
+        left, right = find_first_left_right(top, bottom)
 
-        res = "   "
-        for x in range(left, right+1):
-            res += str(x)
-            if x < 10:
-                res += "  "
-            else:
-                res += " "
-        for y in range(top, bottom+1):
-            res += "\n"
-            res += str(y)
-            res += " "
+        if left == self.size and right == 0:
+            res = "No stones have been placed so far"
+        else:
+            res = "   "
             for x in range(left, right+1):
-                if self.board[y][x] == FREE_SPACE:
-                    res += " 0 "
-                elif self.board[y][x] == PLACEHOLDER:
-                    res += " - "
+                res += str(x)
+                if x < 10:
+                    res += "  "
                 else:
-                    res += str(self.board[y][x])
-        res += "\n"
+                    res += " "
+            for y in range(top, bottom+1):
+                res += "\n"
+                res += str(y)
+                res += " "
+                for x in range(left, right+1):
+                    if self.board[y][x] == FREE_SPACE:
+                        res += " 0 "
+                    elif self.board[y][x] == PLACEHOLDER:
+                        res += " - "
+                    else:
+                        res += str(self.board[y][x])
+            res += "\n"
+
         return res
 
-    def is_terminal(self, player1, player2):
-        if player1.queen:
-            if player1.queen.connections.count(FREE_SPACE) == 0:
-                if player2.queen.connections.count(FREE_SPACE) == 0:
-                    print("its a tie")
-                    return True
-                else:
-                    print("black lost")
-                    return True
-        if player2.queen:
-            if player2.queen.connections.count(FREE_SPACE) == 0:
-                print("white lost")
-                return True
+    def __repr__(self):
+        return self.__str__()
 
 
 def create_board(size):
@@ -98,3 +83,46 @@ def create_board(size):
             else:
                 board[y].append(PLACEHOLDER)
     return board
+
+
+def is_players_queen_surrounded(player):
+    if player.queen:
+        return player.queen.connections.count(FREE_SPACE) == 0
+
+
+def is_game_terminal(player1, player2):
+    if is_players_queen_surrounded(player1):
+        if is_players_queen_surrounded(player2):
+            print("its a tie")
+            return True
+        else:
+            print("player 2 lost")
+            return True
+    elif is_players_queen_surrounded(player2):
+        print("player 1 lost")
+        return True
+    else:
+        return False
+
+
+if __name__ == "__main__":
+    game = Game()
+    game.board[0][0] = "A"
+    game.board[1][1] = "Q"
+    game.board[10][10] = "B"
+
+    print(game)
+    board = create_board(64)
+
+    board[0][0] = "A"
+    board[60][60] = "B"
+
+    print(board)
+
+    board[2][1] = FREE_SPACE
+
+    game2 = Game(board=board, size=4)
+
+    print(game2)
+
+    print(game2.board)
