@@ -65,7 +65,7 @@ class Stone:
                 condition1 = check_connection(self, count-1, FREE_SPACE)
                 return condition1
 
-            def search_if_returns(self, c):
+            def search_if_returns(c):
                 track_positions = [self.connections[c]]
                 closed_positions = [self]
                 first_search = True
@@ -76,7 +76,7 @@ class Stone:
                         condition2 = not first_search
                         condition3 = track_positions[0].connections[c] != FREE_SPACE
                         condition4 = track_positions[0].connections[c] not in closed_positions
-                        condition5 = track_positions = self
+                        condition5 = track_positions[0] == self
                         if condition1 and condition2:
                             print(first_search)
                             print("con1 and con2")
@@ -86,6 +86,7 @@ class Stone:
                         elif condition3 and condition4:
                             track_positions.append(track_positions[0].connections[c])
                         elif condition5:
+                            print('condition5 passed- track position is self')
                     else:
                         closed_positions.append(track_positions[0])
                         del track_positions[0]
@@ -96,7 +97,7 @@ class Stone:
 
             for count in range(NUM_OF_CONNECTIONS):
                 if not check_connection(self, count, FREE_SPACE) and is_previous_space_free():
-                    return search_if_returns(self, count)
+                    return search_if_returns(count)
             else:
                 return True
 

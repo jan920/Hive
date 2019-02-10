@@ -1,4 +1,4 @@
-from board.globals import FREE_SPACE, PLACEHOLDER
+from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_position, NUM_OF_CONNECTIONS
 
 
 class Game:
@@ -103,6 +103,28 @@ def is_game_terminal(player1, player2):
         return True
     else:
         return False
+
+
+def create_board(stones, size):
+    board = Game(turn=1, size=size, board = None, placed_stones=[stones])
+
+    for stone in stones:
+        if stone.position[0] % 2 == stone.position[1] % 2:
+            board[stone.position[0]][stone.position[1]] = stone
+
+
+        else:
+            raise ValueError('stone stone position ')
+
+
+def make_connections(stone):
+    for c in range(NUM_OF_CONNECTIONS):
+        if check_position(game, stone.position, c) != FREE_SPACE:
+            set_new_connection(game, stone, c)
+
+
+def create_basic_board():
+    create_board()
 
 
 if __name__ == "__main__":
