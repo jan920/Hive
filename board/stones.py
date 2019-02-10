@@ -2,7 +2,7 @@ from board.globals import FREE_SPACE, NUM_OF_CONNECTIONS, QUEEN, SPIDER, GRASSHO
 
 
 class Stone:
-
+    """Class representing stone in game Hive"""
     def __init__(self, colour, index, kind):
         self.colour = colour
         self.index = index
@@ -13,12 +13,14 @@ class Stone:
         self.above = False
 
     def __str__(self):
+        """Prints stone as kind, index and colour, example B1W for beetle with index 1, colour white"""
         return self.kind + str(self.index) + self.colour
 
     def __repr__(self):
         return self.__str__()
 
     def __eq__(self, other):
+        """Two stones are equal if their colour, kind and index are the same"""
         def condition1():
             return self.colour == other.colour
 
@@ -35,19 +37,40 @@ class Stone:
         else:
             return False
 
-    def add_connection(self, position, stone):
-        self.connections[position] = stone
+    def add_connection(self, position, connection):
+        """Add new connection for self
+
+        :param position: integer in range 0-5 stating position where connection to be added
+        :param connection: either FREE_SPACE placeholder or another stone
+
+        """
+        self.connections[position] = connection
 
     def remove_connection(self, position):
+        """Remove connection and replace it by FREE_SPACE placeholder
+        :param position: integer in range 0-5 stating position where connection to be removed
+
+        """
+
         self.connections[position] = FREE_SPACE
 
     def return_placing_moves(self, placing_positions):
+        """Return possible moves how stone can be placed
+
+        :param placing_positions: list of available positions where the stone can be placed
+        :return: List of placing moves of class AvailMove
+
+        """
         placing_moves = []
         for position in placing_positions:
             placing_moves.append(AvailMove(self, position))
         return placing_moves
 
     def is_movable(self):
+        """Determine if stone is able to be moved
+
+        :return: Boolean stating if stone is able to be moved according to the rules
+        """
         def count_holes():
             holes = 0
             previous_connection_occupied = False
@@ -61,7 +84,9 @@ class Stone:
             return holes
 
         def is_it_circle():
+            """Determine if stone is part of circle"""
             def is_previous_space_free():
+                """Return if previous connection on stone is free"""
                 condition1 = check_connection(self, count-1, FREE_SPACE)
                 return condition1
 
@@ -174,7 +199,7 @@ class Stone:
 
 
 class Queen(Stone):
-
+    """Inheriting from class stone with Queen abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=QUEEN)
 
@@ -193,6 +218,7 @@ class Queen(Stone):
 
 
 class Spider(Stone):
+    """Inheriting from class stone with Spider abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=SPIDER)
 
@@ -208,6 +234,7 @@ class Spider(Stone):
 
 
 class Grasshopper(Stone):
+    """Inheriting from class stone with Grasshopper abilities"""
 
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=GRASSHOPPER)
@@ -226,6 +253,7 @@ class Grasshopper(Stone):
 
 
 class Beetle(Stone):
+    """Inheriting from class stone with Beetle abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=BEETLE)
 
@@ -247,7 +275,7 @@ class Beetle(Stone):
 
 
 class Ant(Stone):
-
+    """Inheriting from class stone with Ant abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=ANT)
 
@@ -264,11 +292,13 @@ class Ant(Stone):
 
 
 class AvailMove:
+    """Class representing available move"""
     def __init__(self, stone, position):
         self.stone = stone
         self.position = position
 
     def __eq__(self, other):
+        """Two moves are equal if the stones and positions of the moves are equal"""
         return self.stone == other.stone and self.position == other.position
 
     def __str__(self):

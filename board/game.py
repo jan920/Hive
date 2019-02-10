@@ -2,6 +2,7 @@ from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_pos
 
 
 class Game:
+    """Class representing game of Hive"""
     def __init__(self, turn=1, size=68, board = None, placed_stones=[]):
         self.turn = turn
         self.size = size
@@ -12,7 +13,9 @@ class Game:
         self.placed_stones = placed_stones
 
     def __str__(self):
+        """Prints the board"""
         def find_first_stone_from_top():
+            """Find first line which contains stone"""
             for y in range(self.size):
                 for item in self.board[y]:
                     if item is not PLACEHOLDER or item is not FREE_SPACE:
@@ -20,6 +23,7 @@ class Game:
             return 0
 
         def find_first_stone_from_bottom():
+            """Find last line which contains stone"""
             for y in reversed(range(self.size)):
                 for item in self.board[y]:
                     if item is not PLACEHOLDER or item is not FREE_SPACE:
@@ -27,6 +31,7 @@ class Game:
             return self.size - 1
 
         def find_first_left_right(top, bottom):
+            """"Find left, right most position of stone, withing area limited by top, bottom arguments received"""
             left = self.size
             right = 0
             for y in range(top, bottom + 1):
@@ -74,6 +79,18 @@ class Game:
 
 
 def create_board(size):
+
+    """Create board
+
+    Params:
+    size: positive integer stating size of the board
+    Returns:
+    return created board
+    Raises
+    ValueError: if size is not integer
+
+    """
+
     board = []
     for y in range(size):
         board.append([])
@@ -86,11 +103,13 @@ def create_board(size):
 
 
 def is_players_queen_surrounded(player):
+    """Return boolean if queen is surrounded"""
     if player.queen:
         return player.queen.connections.count(FREE_SPACE) == 0
 
 
 def is_game_terminal(player1, player2):
+    """Return boolean if game is terminal"""
     if is_players_queen_surrounded(player1):
         if is_players_queen_surrounded(player2):
             print("its a tie")
@@ -105,7 +124,19 @@ def is_game_terminal(player1, player2):
         return False
 
 
-def create_board(stones, size):
+def create_game(size=64, stones=[]):
+    """Create game from received stones
+
+    :param size: positive integer stating size of the board for the game
+    :param stones: list of stones
+    :return: created game
+    :raise
+    ValueError: if size not integer
+    ValueError: if stones are not stone class, miss property position
+    ValueError: if stones position is not correct
+
+    """
+
     board = Game(turn=1, size=size, board = None, placed_stones=[stones])
 
     for stone in stones:
@@ -118,13 +149,10 @@ def create_board(stones, size):
 
 
 def make_connections(stone):
+    """Creates new connections for stone received"""
     for c in range(NUM_OF_CONNECTIONS):
         if check_position(game, stone.position, c) != FREE_SPACE:
             set_new_connection(game, stone, c)
-
-
-def create_basic_board():
-    create_board()
 
 
 if __name__ == "__main__":
