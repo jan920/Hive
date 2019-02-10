@@ -166,13 +166,6 @@ def create_game(size=64, stones=[]):
             raise ValueError('stone stone position ')
 
 
-def make_connections(stone):
-    """Creates new connections for stone received"""
-    for c in range(NUM_OF_CONNECTIONS):
-        if check_position(game, stone.position, c) != FREE_SPACE:
-            set_new_connection(game, stone, c)
-
-
 def find_available_moves(player, game):
     def return_placing_positions(game, player):
         def check_placable(move, player, game):
@@ -265,7 +258,7 @@ def make_move(game, move, player1, player2):
 
                 make_connections(stone.under)
 
-            def add_stone_under(game, stone, player1, player2):
+            def add_stone_under(game, stone, player1):
                 if game.board[position[0]][position[1]] != FREE_SPACE:
                     stone.under = game.board[position[0]][position[1]]
                     if stone.under == player1.queen:
@@ -281,7 +274,7 @@ def make_move(game, move, player1, player2):
                 game.board[stone.position[0]][stone.position[1]] = FREE_SPACE
                 clean_connections(stone)
 
-            add_stone_under(game, stone, player1, player2)
+            add_stone_under(game, stone, player1)
 
         if stone.kind == BEETLE:
             move_beetle(game, stone, player1, player2)

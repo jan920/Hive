@@ -103,7 +103,6 @@ class Stone:
                         condition4 = track_positions[0].connections[c] not in closed_positions
                         condition5 = track_positions[0] == self
                         if condition1 and condition2:
-                            print(first_search)
                             print("con1 and con2")
                             return True
                         elif not condition3:
@@ -165,6 +164,7 @@ class Stone:
         d = 0
         while possible_moves:
             if d == depth:
+                game.board[self.position[0]][self.position[1]] = self
                 return available_positions
             count = 0
             y = possible_moves[0][0]
@@ -189,7 +189,6 @@ class Stone:
                         break
                 else:
                     count = 0
-
             closed_positions.append(possible_moves[0])
             del possible_moves[0]
 
@@ -209,7 +208,7 @@ class Queen(Stone):
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(1, game)
             for position in available_positions:
@@ -225,7 +224,7 @@ class Spider(Stone):
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(3, game)
             for position in available_positions:
@@ -282,7 +281,7 @@ class Ant(Stone):
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(100, game)
 
