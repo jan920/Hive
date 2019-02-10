@@ -4,6 +4,7 @@ from board.stones import Spider, Beetle, Grasshopper, Ant, Queen
 
 
 class Player:
+    """Class representing player in game Hive"""
     def __init__(self, colour, choice_of_stones=(QUEEN, SPIDER, GRASSHOPPER, BEETLE, ANT)):
         self.colour = colour
         self.queen = False
