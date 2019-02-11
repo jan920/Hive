@@ -100,7 +100,7 @@ class Stone:
                     find_stones.append(connection)
             closed_positions = [self]
             track_positions = [find_stones.pop()]
-            while len(track_positions) > 0:
+            while track_positions:
                 for connection in track_positions[0].connections:
                     condition0 = connection == FREE_SPACE
                     condition1 = connection in find_stones
@@ -111,7 +111,7 @@ class Stone:
                         pass
                     elif condition1:
                         find_stones.remove(connection)
-                        if len(find_stones) == 0:
+                        if not find_stones:
                             return False
                         track_positions.append(connection)
                     elif condition2 and condition3:
@@ -153,6 +153,26 @@ class Stone:
         else:
             return True
 
+    def spider_move(self, distance, game, current_position, previous_position=None):
+        available_positions = []
+        next_positions = []
+        for c in range(NUM_OF_CONNECTIONS):
+            condition1 = check_position(game, current_position, c) == FREE_SPACE
+            condition2 = check_position(game, current_position, c - 1) == FREE_SPACE
+            condition3 = check_position(game, current_position, c + 1) == FREE_SPACE
+            condition4 = count_new_position(current_position, c) != previous_position
+            if condition1 and not (condition2 and condition3) and (condition2 or condition3) and condition4:
+                next_position = count_new_position(current_position, c)
+                next_positions.append(next_position)
+        for position in next_positions:
+            print(distance)
+            if distance == 0:
+                available_positions.append(position)
+            else:
+                available_positions += self.spider_move(distance-1, game, current_position=position,
+                                                        previous_position=current_position)
+        return available_positions
+
     def basic_move(self, distance, game):
         """Return all possible basic moves(move where stone is moving around hive) in chosen distance
 
@@ -161,47 +181,32 @@ class Stone:
         :return:
         """
 
-        def find_occupied_position():
-            """Return first position around y and x which does not contain free space"""
-            for i in range(NUM_OF_CONNECTIONS):
-                if check_position(game, (y, x), i) != FREE_SPACE:
-                    return i
-
         game.board[self.position[0]][self.position[1]] = FREE_SPACE
-        possible_moves = [self.position]
+        track_positions = [self.position]
         available_positions = []
         closed_positions = []
         d = 0
-        while possible_moves:
+        while track_positions:
             if d == distance:
                 game.board[self.position[0]][self.position[1]] = self
                 return available_positions
-            count = 0
-            y = possible_moves[0][0]
-            x = possible_moves[0][1]
-            i = find_occupied_position()
-            for c in range(i, i + NUM_OF_CONNECTIONS + 1):
-                if check_position(game, (y, x), c) == FREE_SPACE:
-                    count += 1
-                elif count > 1:
-                    for c2 in [c - count, c - 1]:
-                        next_position = count_new_position((y, x), c2)
-                        if next_position not in closed_positions:
-                            possible_moves.append(next_position)
-                            condition1 = (d == 2 or distance != 3)
-                            condition2 = next_position != self.position
-                            condition3 = next_position not in available_positions
-                            if condition1 and condition2 and condition3:
-                                available_positions.append(next_position)
-                    if count == 2 and c < i + 4:
-                        count = 0
-                    else:
-                        break
-                else:
-                    count = 0
-            closed_positions.append(possible_moves[0])
-            del possible_moves[0]
+            y = track_positions[0][0]
+            x = track_positions[0][1]
+            for c in range(NUM_OF_CONNECTIONS):
+                condition1 = check_position(game, track_positions[0], c) == FREE_SPACE
+                condition2 = check_position(game, track_positions[0], c-1) == FREE_SPACE
+                condition3 = check_position(game, track_positions[0], c+1) == FREE_SPACE
+                if condition1 and not (condition2 and condition3) and (condition2 or condition3):
+                    next_position = count_new_position(track_positions[0], c)
+                    condition1 = next_position not in closed_positions
+                    condition2 = next_position not in available_positions
+                    if condition1 and condition2:
+                        track_positions.append(next_position)
+                        condition1 = (d == 2 or distance != 3)
+                        if condition1:
+                            available_positions.append(next_position)
 
+            closed_positions.append(track_positions.pop(0))
             d += 1
         game.board[self.position[0]][self.position[1]] = self
         return available_positions
@@ -227,7 +232,16 @@ class Spider(Stone):
 
     def return_moves(self, game):
         """Return all possible spider moves"""
-        return return_basic_moves(self, distance=3, game=game)
+        available_moves = []
+        if self.is_blocked():
+            return available_moves
+        else:
+            game.board[self.position[0]][self.position[1]] = FREE_SPACE
+            available_positions = self.spider_move(2, game, self.position)
+            game.board[self.position[0]][self.position[1]] = self
+            for position in available_positions:
+                available_moves.append(AvailMove(self, position))
+        return available_moves
 
 
 class Grasshopper(Stone):
@@ -279,7 +293,7 @@ class Ant(Stone):
         Stone.__init__(self, colour, index, kind=ANT)
 
     def return_moves(self, game):
-        return return_basic_moves(self, distance=3, game=game)
+        return return_basic_moves(self, distance=100, game=game)
 
 
 def return_basic_moves(stone, distance, game):
