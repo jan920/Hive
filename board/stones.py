@@ -2,7 +2,7 @@ from board.globals import FREE_SPACE, NUM_OF_CONNECTIONS, QUEEN, SPIDER, GRASSHO
 
 
 class Stone:
-
+    """Class representing stone in game Hive"""
     def __init__(self, colour, index, kind):
         self.colour = colour
         self.index = index
@@ -13,12 +13,14 @@ class Stone:
         self.above = False
 
     def __str__(self):
+        """Prints stone as kind, index and colour, example B1W for beetle with index 1, colour white"""
         return self.kind + str(self.index) + self.colour
 
     def __repr__(self):
         return self.__str__()
 
     def __eq__(self, other):
+        """Two stones are equal if their colour, kind and index are the same"""
         def condition1():
             return self.colour == other.colour
 
@@ -35,19 +37,40 @@ class Stone:
         else:
             return False
 
-    def add_connection(self, position, stone):
-        self.connections[position] = stone
+    def add_connection(self, position, connection):
+        """Add new connection for self
+
+        :param position: integer in range 0-5 stating position where connection to be added
+        :param connection: either FREE_SPACE placeholder or another stone
+
+        """
+        self.connections[position] = connection
 
     def remove_connection(self, position):
+        """Remove connection and replace it by FREE_SPACE placeholder
+        :param position: integer in range 0-5 stating position where connection to be removed
+
+        """
+
         self.connections[position] = FREE_SPACE
 
     def return_placing_moves(self, placing_positions):
+        """Return possible moves how stone can be placed
+
+        :param placing_positions: list of available positions where the stone can be placed
+        :return: List of placing moves of class AvailMove
+
+        """
         placing_moves = []
         for position in placing_positions:
             placing_moves.append(AvailMove(self, position))
         return placing_moves
 
     def is_movable(self):
+        """Determine if stone is able to be moved
+
+        :return: Boolean stating if stone is able to be moved according to the rules
+        """
         def count_holes():
             holes = 0
             previous_connection_occupied = False
@@ -60,43 +83,31 @@ class Stone:
                     previous_connection_occupied = True
             return holes
 
-        def is_it_circle():
-            def is_previous_space_free():
-                condition1 = check_connection(self, count-1, FREE_SPACE)
-                return condition1
+        def brakes_one_hive():
+            find_stones = []
+            for connection in self.connections:
+                if connection != FREE_SPACE:
+                    find_stones.append(connection)
+            closed_positions = [self]
+            track_positions = [find_stones.pop()]
+            while len(track_positions) > 0:
+                for connection in track_positions[0].connections:
+                    condition0 = connection == FREE_SPACE
+                    condition1 = connection in find_stones
+                    condition2 = connection not in track_positions
+                    condition3 = connection not in closed_positions
 
-            def search_if_returns(self, c):
-                track_positions = [self.connections[c]]
-                closed_positions = [self]
-                first_search = True
-                #I must change it so it first runs all around self which are connected and then it continues
-                while track_positions:
-                    for c in range(NUM_OF_CONNECTIONS):
-                        condition1 = track_positions[0].connections[c] == self
-                        condition2 = not first_search
-                        condition3 = track_positions[0].connections[c] != FREE_SPACE
-                        condition4 = track_positions[0].connections[c] not in closed_positions
-                        condition5 = track_positions = self
-                        if condition1 and condition2:
-                            print(first_search)
-                            print("con1 and con2")
-                            return True
-                        elif not condition3:
-                            first_search = False
-                        elif condition3 and condition4:
-                            track_positions.append(track_positions[0].connections[c])
-                        elif condition5:
-                    else:
-                        closed_positions.append(track_positions[0])
-                        del track_positions[0]
-                        first_search = False
+                    if condition0:
+                        pass
+                    elif condition1:
+                        find_stones.remove(connection)
+                        if len(find_stones) == 0:
+                            return False
+                        track_positions.append(connection)
+                    elif condition2 and condition3:
+                        track_positions.append(connection)
                 else:
-                    print("run out of track_positions")
-                    return False
-
-            for count in range(NUM_OF_CONNECTIONS):
-                if not check_connection(self, count, FREE_SPACE) and is_previous_space_free():
-                    return search_if_returns(self, count)
+                    closed_positions.append(track_positions.pop(0))
             else:
                 return True
 
@@ -110,10 +121,10 @@ class Stone:
                 return True
             elif count_holes() < 2:
                 return True
-            elif is_it_circle():
-                return True
-            else:
+            elif brakes_one_hive():
                 return False
+            else:
+                return True
 
     def is_blocked(self):
         for c in range(NUM_OF_CONNECTIONS):
@@ -139,6 +150,7 @@ class Stone:
         d = 0
         while possible_moves:
             if d == depth:
+                game.board[self.position[0]][self.position[1]] = self
                 return available_positions
             count = 0
             y = possible_moves[0][0]
@@ -163,7 +175,6 @@ class Stone:
                         break
                 else:
                     count = 0
-
             closed_positions.append(possible_moves[0])
             del possible_moves[0]
 
@@ -173,7 +184,7 @@ class Stone:
 
 
 class Queen(Stone):
-
+    """Inheriting from class stone with Queen abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=QUEEN)
 
@@ -183,7 +194,7 @@ class Queen(Stone):
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(1, game)
             for position in available_positions:
@@ -192,13 +203,14 @@ class Queen(Stone):
 
 
 class Spider(Stone):
+    """Inheriting from class stone with Spider abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=SPIDER)
 
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(3, game)
             for position in available_positions:
@@ -207,6 +219,7 @@ class Spider(Stone):
 
 
 class Grasshopper(Stone):
+    """Inheriting from class stone with Grasshopper abilities"""
 
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=GRASSHOPPER)
@@ -225,6 +238,7 @@ class Grasshopper(Stone):
 
 
 class Beetle(Stone):
+    """Inheriting from class stone with Beetle abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=BEETLE)
 
@@ -246,14 +260,14 @@ class Beetle(Stone):
 
 
 class Ant(Stone):
-
+    """Inheriting from class stone with Ant abilities"""
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=ANT)
 
     def return_moves(self, game):
         available_moves = []
         if self.is_blocked():
-            return
+            return available_moves
         else:
             available_positions = self.basic_move(100, game)
 
@@ -263,11 +277,13 @@ class Ant(Stone):
 
 
 class AvailMove:
+    """Class representing available move"""
     def __init__(self, stone, position):
         self.stone = stone
         self.position = position
 
     def __eq__(self, other):
+        """Two moves are equal if the stones and positions of the moves are equal"""
         return self.stone == other.stone and self.position == other.position
 
     def __str__(self):
