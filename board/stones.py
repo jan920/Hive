@@ -83,45 +83,31 @@ class Stone:
                     previous_connection_occupied = True
             return holes
 
-        def is_it_circle():
-            """Determine if stone is part of circle"""
-            def is_previous_space_free():
-                """Return if previous connection on stone is free"""
-                condition1 = check_connection(self, count-1, FREE_SPACE)
-                return condition1
+        def brakes_one_hive():
+            find_stones = []
+            for connection in self.connections:
+                if connection != FREE_SPACE:
+                    find_stones.append(connection)
+            closed_positions = [self]
+            track_positions = [find_stones.pop()]
+            while len(track_positions) > 0:
+                for connection in track_positions[0].connections:
+                    condition0 = connection == FREE_SPACE
+                    condition1 = connection in find_stones
+                    condition2 = connection not in track_positions
+                    condition3 = connection not in closed_positions
 
-            def search_if_returns(c):
-                track_positions = [self.connections[c]]
-                closed_positions = [self]
-                first_search = True
-                #I must change it so it first runs all around self which are connected and then it continues
-                while track_positions:
-                    for c in range(NUM_OF_CONNECTIONS):
-                        condition1 = track_positions[0].connections[c] == self
-                        condition2 = not first_search
-                        condition3 = track_positions[0].connections[c] != FREE_SPACE
-                        condition4 = track_positions[0].connections[c] not in closed_positions
-                        condition5 = track_positions[0] == self
-                        if condition1 and condition2:
-                            print("con1 and con2")
-                            return True
-                        elif not condition3:
-                            first_search = False
-                        elif condition3 and condition4:
-                            track_positions.append(track_positions[0].connections[c])
-                        elif condition5:
-                            print('condition5 passed- track position is self')
-                    else:
-                        closed_positions.append(track_positions[0])
-                        del track_positions[0]
-                        first_search = False
+                    if condition0:
+                        pass
+                    elif condition1:
+                        find_stones.remove(connection)
+                        if len(find_stones) == 0:
+                            return False
+                        track_positions.append(connection)
+                    elif condition2 and condition3:
+                        track_positions.append(connection)
                 else:
-                    print("run out of track_positions")
-                    return False
-
-            for count in range(NUM_OF_CONNECTIONS):
-                if not check_connection(self, count, FREE_SPACE) and is_previous_space_free():
-                    return search_if_returns(count)
+                    closed_positions.append(track_positions.pop(0))
             else:
                 return True
 
@@ -135,10 +121,10 @@ class Stone:
                 return True
             elif count_holes() < 2:
                 return True
-            elif is_it_circle():
-                return True
-            else:
+            elif brakes_one_hive():
                 return False
+            else:
+                return True
 
     def is_blocked(self):
         for c in range(NUM_OF_CONNECTIONS):

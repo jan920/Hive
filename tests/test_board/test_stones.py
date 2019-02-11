@@ -174,9 +174,9 @@ class TestMoves():
         stone4.connection = [FREE_SPACE, 1, FREE_SPACE, 1, 1, 1]
         assert
     """
-    def test_is_it_circle(self):
+    def test_is_movable(self):
         for case_number, case in enumerate(self.cases):
-            if case_number in [1]:
+            if case_number in []:
                 pass
             else:
                 for stone_number, stone in enumerate(case):
