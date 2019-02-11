@@ -88,11 +88,11 @@ class Game:
                     print("its a tie")
                     return True
                 else:
-                    print("black lost")
+                    print("white lost")
                     return True
         if player2.queen:
             if player2.queen.connections.count(FREE_SPACE) == 0:
-                print("white lost")
+                print("black lost")
                 return True
 
 
@@ -355,44 +355,11 @@ def main():
                 print("Enter correct move")
             else:
                 break
-
-        """
-        move = int(input("Choose move: "))
-        if game.turn % 2 == 0:
-            move = AI.pick_move(game, current_player, another_player)
-        else:
-            move = available_moves[move]
-        make_move(game, move, current_player, another_player)
-        """
         if game.is_terminal(player1, player2):
+            print(game.board)
             break
 
 
 if __name__ == "__main__":
     main()
 
-
-
-'''
-if __name__ == "__main__":
-    game = Game()
-    game.board[0][0] = "A"
-    game.board[1][1] = "Q"
-    game.board[10][10] = "B"
-
-    print(game)
-    board = create_board(64)
-
-    board[0][0] = "A"
-    board[60][60] = "B"
-
-    print(board)
-
-    board[2][1] = FREE_SPACE
-
-    game2 = Game(board=board, size=4)
-
-    print(game2)
-
-    print(game2.board)
-'''

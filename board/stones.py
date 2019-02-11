@@ -70,7 +70,9 @@ class Stone:
         """Determine if stone is able to be moved
 
         :return: Boolean stating if stone is able to be moved according to the rules
+
         """
+
         def count_holes():
             holes = 0
             previous_connection_occupied = False
@@ -84,6 +86,12 @@ class Stone:
             return holes
 
         def brakes_one_hive():
+            """Check if moving the stone would break "One Hive Rule"
+
+            :return: boolean if "One Hive Rule" would be broken by moving this stone
+
+            """
+
             find_stones = []
             for connection in self.connections:
                 if connection != FREE_SPACE:
@@ -127,6 +135,13 @@ class Stone:
                 return True
 
     def is_blocked(self):
+        """Return if stone is blocked and because of that cannot do basic move
+
+        :return: boolean if stone is blocked meaning if there are not 2 places next to each other next to the stone
+        witch would allow the stone to make basic move
+
+        """
+
         for c in range(NUM_OF_CONNECTIONS):
             cond1 = self.connections[c] == FREE_SPACE
             cond2 = self.connections[(c - 1) % NUM_OF_CONNECTIONS] == FREE_SPACE
@@ -136,9 +151,16 @@ class Stone:
         else:
             return True
 
-    def basic_move(self, depth, game):
+    def basic_move(self, distance, game):
+        """Return all possible basic moves(move where stone is moving around hive) in chosen distance
+
+        :param depth: integer stating
+        :param game:
+        :return:
+        """
 
         def find_occupied_position(game, y, x):
+            """Return first position around y and x which does not contain free space"""
             for i in range(NUM_OF_CONNECTIONS):
                 if check_position(game, (y, x), i) != FREE_SPACE:
                     return i
@@ -149,7 +171,7 @@ class Stone:
         closed_positions = []
         d = 0
         while possible_moves:
-            if d == depth:
+            if d == distance:
                 game.board[self.position[0]][self.position[1]] = self
                 return available_positions
             count = 0
@@ -164,7 +186,7 @@ class Stone:
                         next_position = count_new_position((y, x), c2)
                         if next_position not in closed_positions:
                             possible_moves.append(next_position)
-                            condition1 = (d == 2 or depth != 3)
+                            condition1 = (d == 2 or distance != 3)
                             condition2 = next_position != self.position
                             condition3 = next_position not in available_positions
                             if condition1 and condition2 and condition3:
@@ -192,14 +214,7 @@ class Queen(Stone):
         return "Q " + self.colour
 
     def return_moves(self, game):
-        available_moves = []
-        if self.is_blocked():
-            return available_moves
-        else:
-            available_positions = self.basic_move(1, game)
-            for position in available_positions:
-                available_moves.append(AvailMove(self, position))
-        return available_moves
+        return return_basic_moves(self, distance=1, game=game)
 
 
 class Spider(Stone):
@@ -208,14 +223,7 @@ class Spider(Stone):
         Stone.__init__(self, colour, index, kind=SPIDER)
 
     def return_moves(self, game):
-        available_moves = []
-        if self.is_blocked():
-            return available_moves
-        else:
-            available_positions = self.basic_move(3, game)
-            for position in available_positions:
-                available_moves.append(AvailMove(self, position))
-        return available_moves
+        return return_basic_moves(self, distance=3, game=game)
 
 
 class Grasshopper(Stone):
@@ -265,15 +273,18 @@ class Ant(Stone):
         Stone.__init__(self, colour, index, kind=ANT)
 
     def return_moves(self, game):
-        available_moves = []
-        if self.is_blocked():
-            return available_moves
-        else:
-            available_positions = self.basic_move(100, game)
+        return return_basic_moves(self, distance=3, game=game)
 
-            for position in available_positions:
-                available_moves.append(AvailMove(self, position))
+
+def return_basic_moves(stone, distance, game):
+    available_moves = []
+    if stone.is_blocked():
         return available_moves
+    else:
+        available_positions = stone.basic_move(distance, game)
+        for position in available_positions:
+            available_moves.append(AvailMove(stone, position))
+    return available_moves
 
 
 class AvailMove:
