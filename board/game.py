@@ -57,17 +57,17 @@ class Game:
             res = "No stones have been placed so far"
         else:
             res = "   "
-            for x in range(left, right+1):
+            for x in range(left-2, right+3):
                 res += str(x)
                 if x < 10:
                     res += "  "
                 else:
                     res += " "
-            for y in range(top, bottom+1):
+            for y in range(top-1, bottom+2):
                 res += "\n"
                 res += str(y)
                 res += " "
-                for x in range(left, right+1):
+                for x in range(left-2, right+3):
                     if self.board[y][x] == FREE_SPACE:
                         res += " 0 "
                     elif self.board[y][x] == PLACEHOLDER:
