@@ -77,7 +77,7 @@ class Stone:
             holes = 0
             previous_connection_occupied = False
             for count in range(NUM_OF_CONNECTIONS+1):
-                if self.connections[count%NUM_OF_CONNECTIONS] == FREE_SPACE:
+                if self.connections[count % NUM_OF_CONNECTIONS] == FREE_SPACE:
                     if previous_connection_occupied:
                         holes += 1
                         previous_connection_occupied = False
@@ -154,12 +154,12 @@ class Stone:
     def basic_move(self, distance, game):
         """Return all possible basic moves(move where stone is moving around hive) in chosen distance
 
-        :param depth: integer stating
-        :param game:
+        :param distance: integer stating how far can stone move
+        :param game: game
         :return:
         """
 
-        def find_occupied_position(game, y, x):
+        def find_occupied_position():
             """Return first position around y and x which does not contain free space"""
             for i in range(NUM_OF_CONNECTIONS):
                 if check_position(game, (y, x), i) != FREE_SPACE:
@@ -177,7 +177,7 @@ class Stone:
             count = 0
             y = possible_moves[0][0]
             x = possible_moves[0][1]
-            i = find_occupied_position(game, y, x)
+            i = find_occupied_position()
             for c in range(i, i + NUM_OF_CONNECTIONS + 1):
                 if check_position(game, (y, x), c) == FREE_SPACE:
                     count += 1
