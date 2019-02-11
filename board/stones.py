@@ -74,6 +74,8 @@ class Stone:
         """
 
         def count_holes():
+            """Return number of continuous spaces around stone"""
+
             holes = 0
             previous_connection_occupied = False
             for count in range(NUM_OF_CONNECTIONS+1):
@@ -214,6 +216,7 @@ class Queen(Stone):
         return "Q " + self.colour
 
     def return_moves(self, game):
+        """Return all possible queen moves"""
         return return_basic_moves(self, distance=1, game=game)
 
 
@@ -223,6 +226,7 @@ class Spider(Stone):
         Stone.__init__(self, colour, index, kind=SPIDER)
 
     def return_moves(self, game):
+        """Return all possible spider moves"""
         return return_basic_moves(self, distance=3, game=game)
 
 
@@ -233,6 +237,7 @@ class Grasshopper(Stone):
         Stone.__init__(self, colour, index, kind=GRASSHOPPER)
 
     def return_moves(self, game):
+        """Return all possible grasshoper moves"""
         available_moves = []
         for c in range(NUM_OF_CONNECTIONS):
             if self.connections[c] != FREE_SPACE:
@@ -251,6 +256,7 @@ class Beetle(Stone):
         Stone.__init__(self, colour, index, kind=BEETLE)
 
     def return_moves(self, game):
+        """Return all possible beetle moves"""
         available_moves = []
         if self.under:
             for c in range(NUM_OF_CONNECTIONS):
@@ -277,6 +283,8 @@ class Ant(Stone):
 
 
 def return_basic_moves(stone, distance, game):
+    """Returns basic moves in distance received"""
+
     available_moves = []
     if stone.is_blocked():
         return available_moves

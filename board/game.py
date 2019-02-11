@@ -82,19 +82,20 @@ class Game:
         return self.__str__()
 
 
-def is_terminal(player1, player2):
-    if player1.queen:
-        if player1.queen.connections.count(FREE_SPACE) == 0:
-            if player2.queen.connections.count(FREE_SPACE) == 0:
-                print("its a tie")
-                return True
-            else:
-                print("white lost")
-                return True
-    if player2.queen:
-        if player2.queen.connections.count(FREE_SPACE) == 0:
-            print("black lost")
+def is_game_terminal(player1, player2):
+    """Return boolean if game is terminal"""
+    if is_players_queen_surrounded(player1):
+        if is_players_queen_surrounded(player2):
+            print("its a tie")
             return True
+        else:
+            print("player 2 lost")
+            return True
+    elif is_players_queen_surrounded(player2):
+        print("player 1 lost")
+        return True
+    else:
+        return False
 
 
 def create_board(size):
@@ -127,22 +128,6 @@ def is_players_queen_surrounded(player):
         return player.queen.connections.count(FREE_SPACE) == 0
 
 
-def is_game_terminal(player1, player2):
-    """Return boolean if game is terminal"""
-    if is_players_queen_surrounded(player1):
-        if is_players_queen_surrounded(player2):
-            print("its a tie")
-            return True
-        else:
-            print("player 2 lost")
-            return True
-    elif is_players_queen_surrounded(player2):
-        print("player 1 lost")
-        return True
-    else:
-        return False
-
-
 def create_game(size=64, stones=[]):
     """Create game from received stones
 
@@ -156,12 +141,12 @@ def create_game(size=64, stones=[]):
 
     """
 
-    board = Game(turn=1, size=size, board = None, placed_stones=[stones])
+    game = Game(turn=1, size=size, board=None, placed_stones=[stones])
 
     for stone in stones:
         if stone.position[0] % 2 == stone.position[1] % 2:
-            board[stone.position[0]][stone.position[1]] = stone
-
+            game.board[stone.position[0]][stone.position[1]] = stone
+            make_connections(stone, game)
 
         else:
             raise ValueError('stone stone position ')
@@ -191,6 +176,7 @@ def find_available_moves(player, game):
         return placing_positions
 
     def return_placing_moves():
+        """Return all possible moves how stones could be placed"""
         placing_moves = []
         placing_positions = return_placing_positions()
         for stone in player.available_stones:
@@ -198,34 +184,37 @@ def find_available_moves(player, game):
         return placing_moves
 
     def first_second_turn():
-        available_moves = []
+        """Return all possible moves in first and second turn"""
+        first_turn_moves = []
         if game.turn == 1:
             position = (34, 34)
         else:
             position = (34, 36)
         for stone in player.available_stones:
             if stone.kind not in [QUEEN]:
-                available_moves.append(AvailMove(stone, position))
-        return available_moves
+                first_turn_moves.append(AvailMove(stone, position))
+        return first_turn_moves
 
     def queen_placed():
-        available_moves = return_placing_moves()
+        """Return all possible moves after queen has been moved which makes pieces movable"""
+        queen_placed_moves = return_placing_moves()
         for stone in player.placed_stones:
             if stone.is_movable():
-                available_moves += stone.return_moves(game)
-        return available_moves
+                queen_placed_moves += stone.return_moves(game)
+        return queen_placed_moves
 
     def queen_not_placed():
-        available_moves = []
+        """Return all possible moves if queen has not been placed, pieces cannot move and queen has to be placed if it is move 7 or 8"""
+        queen_not_placed_moves = []
         placing_positions = return_placing_positions()
         if game.turn == 7 or game.turn == 8:
             for stone in player.available_stones:
                 if stone.kind == QUEEN:
-                    available_moves += stone.return_placing_moves(placing_positions)
+                    queen_not_placed_moves += stone.return_placing_moves(placing_positions)
         else:
             for stone in player.available_stones:
-                available_moves += stone.return_placing_moves(placing_positions)
-        return available_moves
+                queen_not_placed_moves += stone.return_placing_moves(placing_positions)
+        return queen_not_placed_moves
 
     if game.turn == 1 or game.turn == 2:
         available_moves = first_second_turn()
@@ -235,6 +224,13 @@ def find_available_moves(player, game):
         available_moves = queen_not_placed()
 
     return available_moves
+
+
+def make_connections(stone, game):
+    """Creates all new connections for the stone according to positions around it"""
+    for c in range(NUM_OF_CONNECTIONS):
+        if check_position(game, stone.position, c) != FREE_SPACE:
+            set_new_connection(game, stone, c)
 
 
 def make_move(game, move, player1, player2):
@@ -257,7 +253,7 @@ def make_move(game, move, player1, player2):
 
                 game.board[stone.position[0]][stone.position[1]] = stone.under
 
-                make_connections(stone.under)
+                make_connections(stone.under, game)
 
             def add_stone_under():
                 if game.board[position[0]][position[1]] != FREE_SPACE:
@@ -284,7 +280,7 @@ def make_move(game, move, player1, player2):
             clean_connections(stone)
         stone.position = position
         game.board[position[0]][position[1]] = stone
-        make_connections(stone)
+        make_connections(stone, game)
 
     def clean_connections(stone):
         """Sets all connections of stone to FREE_SPACE placeholder"""
@@ -293,17 +289,12 @@ def make_move(game, move, player1, player2):
                 stone.connections[c].connections[(c + 3) % NUM_OF_CONNECTIONS] = FREE_SPACE
                 stone.connections[c] = FREE_SPACE
 
-    def make_connections(stone):
-        for c in range(NUM_OF_CONNECTIONS):
-            if check_position(game, stone.position, c) != FREE_SPACE:
-                set_new_connection(game, stone, c)
-
     if move.stone in player1.available_stones:
         place_stone(move.stone, move.position, player1)
     else:
         move_stone(move.stone, move.position)
 
-    make_connections(move.stone)
+    make_connections(move.stone, game)
     game.turn += 1
 
 
@@ -352,11 +343,11 @@ def main():
             try:
                 move = int(input("Choose move: "))
                 make_move(game, available_moves[move], current_player, another_player)
-            except:
+            except Exception as e:
                 print("Enter correct move")
             else:
                 break
-        if is_terminal(player1, player2):
+        if is_game_terminal(player1, player2):
             print(game.board)
             break
 
