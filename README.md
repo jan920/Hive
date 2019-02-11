@@ -2,13 +2,13 @@
 Python version of board game Hive
 
 
-##How to play:
+## How to play:
 Running game.py will start the game
 
-####Rules:\
+#### Rules:
 http://www.ultraboardgames.com/hive/game-rules.php
 
-####Explanation:
+#### Explanation:
 
 So far game can by played by two players against each other later on game with basic opponent will be released
 
@@ -27,4 +27,4 @@ representing colour of the owner of the stone("B")
 Example of this would be "S0W" which is stone of type spider index 0 and it's owner is white player
 
 
-####Enjoy the game!
+#### Enjoy the game!
