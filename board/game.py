@@ -91,10 +91,10 @@ def is_game_terminal(player1, player2):
             print("its a tie")
             return True
         else:
-            print("player 2 lost")
+            print("player 1 lost")
             return True
     elif is_players_queen_surrounded(player2):
-        print("player 1 lost")
+        print("player 2 lost")
         return True
     else:
         return False
@@ -241,7 +241,15 @@ def make_connections(stone, game):
             set_new_connection(game, stone, c)
 
 
-def make_move(game, move, player1, player2):
+def make_move(game, move, current_player, other_player):
+    """Make move
+
+    :param game:
+    :param move: move containing which stone is going to be moved and where
+    :param current_player: Player making the move
+    :param other_player: Player who is not making current move
+    :return:
+    """
     def place_stone(stone, position, player):
         stone.position = position
         player.placed_stones.append(stone)
@@ -252,24 +260,32 @@ def make_move(game, move, player1, player2):
             player.queen = stone
 
     def move_stone(stone, position):
+        """Move stone to position
+
+        :param stone: stone which is to be moved
+        :param position: position where the stone is going to be moved
+        """
         def move_beetle():
+            """Make move with beetle"""
             def free_stone_under():
-                if stone == player1.queen:
-                    player1.queen = stone.under
-                elif stone == player2.queen:
-                    player2.queen = stone.under
+                """Makes stone which was under beetle movable again"""
+                if stone == current_player.queen:
+                    current_player.queen = stone.under
+                elif stone == other_player.queen:
+                    other_player.queen = stone.under
 
                 game.board[stone.position[0]][stone.position[1]] = stone.under
 
                 make_connections(stone.under, game)
 
             def add_stone_under():
+                """Adds stone under beetle"""
                 if game.board[position[0]][position[1]] != FREE_SPACE:
                     stone.under = game.board[position[0]][position[1]]
-                    if stone.under == player1.queen:
-                        player1.queen = stone
-                    elif stone.under == player1.queen:
-                        player1.queen = stone
+                    if stone.under == current_player.queen:
+                        current_player.queen = stone
+                    elif stone.under == current_player.queen:
+                        current_player.queen = stone
 
             if stone.under:
                 free_stone_under()
@@ -297,8 +313,8 @@ def make_move(game, move, player1, player2):
                 stone.connections[c].connections[(c + 3) % NUM_OF_CONNECTIONS] = FREE_SPACE
                 stone.connections[c] = FREE_SPACE
 
-    if move.stone in player1.available_stones:
-        place_stone(move.stone, move.position, player1)
+    if move.stone in current_player.available_stones:
+        place_stone(move.stone, move.position, current_player)
     else:
         move_stone(move.stone, move.position)
 
@@ -307,61 +323,98 @@ def make_move(game, move, player1, player2):
 
 
 def choose_random_move(available_moves):
-    move = randint(0, len(available_moves))
+    b = len(available_moves) - 1
+    move = randint(0, b)
     return move
+
+
+def ai_turn():
+    pass
+
+
+def players_turn(game, current_player, opponent, available_moves):
+    print("")
+    print(game)
+    print("Player1 hand:", current_player.available_stones)
+    print("Player2 hand:", opponent.available_stones)
+    print("")
+    for stone in game.placed_stones:
+        if stone.kind == BEETLE:
+            if stone.under:
+                print(f"Under {stone} there is {stone.under}")
+            else:
+                print(f"There is nothing under {stone}")
+    print("")
+    print(f"Its turn: {game.turn}")
+
+    print("")
+
+    print(f"{current_player} chooses a move")
+
+    print("")
+    c = 0
+    for move in available_moves:
+        print(c, end=" ")
+        print(move)
+        c += 1
+
+    while True:
+        try:
+            move = int(input("Choose move: "))
+            make_move(game, available_moves[move], current_player, opponent)
+        except Exception as e:
+            print("Enter correct move")
+        else:
+            break
+
+
+def random_turn(game, current_player, opponent, available_moves):
+    print('this is random')
+    move_num = choose_random_move(available_moves)
+    move = available_moves[move_num]
+    make_move(game, move, current_player, opponent)
+    print('Opponent moved {} to {}'.format(move.stone, move.position))
+    print(game)
 
 
 def main():
     game = Game()
     player1 = Player("W")
     player2 = Player("B")
+    opponents = [players_turn, random_turn]
+    choices = '''If you want to play game of two players enter "0", 
+    if you want to play against random opponent enter "1",
+    if you want to play against AI enter "2"
+    '''
+    while True:
+        try:
+            print(choices)
+            choice = int(input("Choose opponent: "))
+            if choice == 2:
+                print("I'm sorry but AI opponent is currently not available")
+                opponent = opponents[10]
+            opponent = opponents[choice]
+        except Exception as e:
+            print("Enter correct opponent")
+        else:
+            break
 
     while True:
-        print("")
-        print(game)
-        print("Player1 hand:", end=" ")
-        print(player1.available_stones)
-        print("Player2 hand:", end=" ")
-        print(player2.available_stones)
-        print("")
-        for stone in game.placed_stones:
-            if stone.kind == BEETLE:
-                if stone.under:
-                    print(f"Under {stone} there is {stone.under}")
-                else:
-                    print(f"There is nothing under {stone}")
-        print("")
-
         if game.turn % 2 == 1:
             current_player = player1
             another_player = player2
+            available_moves = find_available_moves(current_player, game)
+            random_turn(game, current_player, another_player, available_moves)
         else:
             current_player = player2
             another_player = player1
-        print(f"Its turn: {game.turn}")
+            available_moves = find_available_moves(current_player, game)
+            opponent(game, current_player, another_player, available_moves)
 
-        print("")
-
-        print(f"{current_player} chooses a move")
-
-        print("")
-        available_moves = find_available_moves(current_player, game)
-        c = 0
-        for move in available_moves:
-            print(c, end=" ")
-            print(move)
-            c += 1
-
-        while True:
-            try:
-                move = int(input("Choose move: "))
-                make_move(game, available_moves[move], current_player, another_player)
-            except Exception as e:
-                print("Enter correct move")
-            else:
-                break
         if is_game_terminal(player1, player2):
-            print(game.board)
+            print(game)
+            print(player1.queen.position)
+            print(player2.queen.position)
             break
 
 
