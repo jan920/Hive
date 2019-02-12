@@ -153,32 +153,12 @@ class Stone:
         else:
             return True
 
-    def spider_move(self, distance, game, current_position, previous_position=None):
-        available_positions = []
-        next_positions = []
-        for c in range(NUM_OF_CONNECTIONS):
-            condition1 = check_position(game, current_position, c) == FREE_SPACE
-            condition2 = check_position(game, current_position, c - 1) == FREE_SPACE
-            condition3 = check_position(game, current_position, c + 1) == FREE_SPACE
-            condition4 = count_new_position(current_position, c) != previous_position
-            if condition1 and not (condition2 and condition3) and (condition2 or condition3) and condition4:
-                next_position = count_new_position(current_position, c)
-                next_positions.append(next_position)
-        for position in next_positions:
-            print(distance)
-            if distance == 0:
-                available_positions.append(position)
-            else:
-                available_positions += self.spider_move(distance-1, game, current_position=position,
-                                                        previous_position=current_position)
-        return available_positions
-
     def basic_move(self, distance, game):
-        """Return all possible basic moves(move where stone is moving around hive) in chosen distance
+        """Return all possible basic positions(where stone could move by sliding around hive) in chosen distance
 
         :param distance: integer stating how far can stone move
         :param game: game
-        :return:
+        :return: all position where stone could move by sliding around hive
         """
 
         game.board[self.position[0]][self.position[1]] = FREE_SPACE
@@ -188,10 +168,7 @@ class Stone:
         d = 0
         while track_positions:
             if d == distance:
-                game.board[self.position[0]][self.position[1]] = self
-                return available_positions
-            y = track_positions[0][0]
-            x = track_positions[0][1]
+                break
             for c in range(NUM_OF_CONNECTIONS):
                 condition1 = check_position(game, track_positions[0], c) == FREE_SPACE
                 condition2 = check_position(game, track_positions[0], c-1) == FREE_SPACE
@@ -202,9 +179,7 @@ class Stone:
                     condition2 = next_position not in available_positions
                     if condition1 and condition2:
                         track_positions.append(next_position)
-                        condition1 = (d == 2 or distance != 3)
-                        if condition1:
-                            available_positions.append(next_position)
+                        available_positions.append(next_position)
 
             closed_positions.append(track_positions.pop(0))
             d += 1
@@ -230,6 +205,34 @@ class Spider(Stone):
     def __init__(self, colour, index):
         Stone.__init__(self, colour, index, kind=SPIDER)
 
+    def spider_move(self, game, current_position, distance=3, previous_position=None):
+        """Basic move for spider (sliding 3 steps around hive)
+
+        :param distance: distance how
+        :param game: game with board
+        :param current_position: position from where will be looking for next position
+        :param previous_position: previous position where stone can't return
+        :return: positions where the spider can move
+        """
+        available_positions = []
+        next_positions = []
+        for c in range(NUM_OF_CONNECTIONS):
+            condition1 = check_position(game, current_position, c) == FREE_SPACE
+            condition2 = check_position(game, current_position, c - 1) == FREE_SPACE
+            condition3 = check_position(game, current_position, c + 1) == FREE_SPACE
+            condition4 = count_new_position(current_position, c) != previous_position
+            if condition1 and not (condition2 and condition3) and (condition2 or condition3) and condition4:
+                next_position = count_new_position(current_position, c)
+                next_positions.append(next_position)
+        for position in next_positions:
+            print(distance)
+            if distance == 0:
+                available_positions.append(position)
+            else:
+                available_positions += self.spider_move(game, current_position=position, distance=distance-1,
+                                                        previous_position=current_position)
+        return available_positions
+
     def return_moves(self, game):
         """Return all possible spider moves"""
         available_moves = []
@@ -237,7 +240,7 @@ class Spider(Stone):
             return available_moves
         else:
             game.board[self.position[0]][self.position[1]] = FREE_SPACE
-            available_positions = self.spider_move(2, game, self.position)
+            available_positions = self.spider_move(game, self.position, 2)
             game.board[self.position[0]][self.position[1]] = self
             for position in available_positions:
                 available_moves.append(AvailMove(self, position))
@@ -251,7 +254,7 @@ class Grasshopper(Stone):
         Stone.__init__(self, colour, index, kind=GRASSHOPPER)
 
     def return_moves(self, game):
-        """Return all possible grasshoper moves"""
+        """Return all possible grasshopper moves"""
         available_moves = []
         for c in range(NUM_OF_CONNECTIONS):
             if self.connections[c] != FREE_SPACE:
