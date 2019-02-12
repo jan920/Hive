@@ -29,9 +29,9 @@ class Player:
     def __str__(self):
         if self.colour == "B":
             return "Second player"
-        else:
-            return "First player"
+
+        return "First player"
 
 
 if __name__ == "__main__":
-    player = Player()
+    pass

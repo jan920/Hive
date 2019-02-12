@@ -33,7 +33,11 @@ def count_new_position(position, c):
 
 
 def set_new_connection(game, stone, c):
-    """Set new connection for stone based on position around stone, set that if that position is stone set it's position equal to stone received"""
+    """
+    Set new connection for stone based on position around stone, set that if that position is stone set it's
+    position equal to stone received
+    """
+
     position = count_new_position(stone.position, c)
     game.board[position[0]][position[1]].connections[(c+3) % NUM_OF_CONNECTIONS] = stone
     stone.connections[c] = game.board[position[0]][position[1]]

@@ -1,4 +1,5 @@
-from board.globals import FREE_SPACE, NUM_OF_CONNECTIONS, QUEEN, SPIDER, GRASSHOPPER, BEETLE, ANT, check_connection, check_position, count_new_position
+from board.globals import FREE_SPACE, NUM_OF_CONNECTIONS, QUEEN, SPIDER, GRASSHOPPER, BEETLE, ANT, check_connection, \
+    check_position, count_new_position
 
 
 class Stone:
@@ -34,8 +35,8 @@ class Stone:
             return False
         elif condition1() and condition2() and condition3():
             return True
-        else:
-            return False
+
+        return False
 
     def add_connection(self, position, connection):
         """Add new connection for self
@@ -116,10 +117,9 @@ class Stone:
                         track_positions.append(connection)
                     elif condition2 and condition3:
                         track_positions.append(connection)
-                else:
-                    closed_positions.append(track_positions.pop(0))
-            else:
-                return True
+                closed_positions.append(track_positions.pop(0))
+
+            return True
 
         if self.above:
             return False
@@ -127,7 +127,7 @@ class Stone:
             return True
         else:
             free_positions = self.connections.count(FREE_SPACE)
-            if free_positions == 0 or free_positions == 1 or free_positions == 5:
+            if free_positions in (0, 1, 5):
                 return True
             elif count_holes() < 2:
                 return True
@@ -150,8 +150,7 @@ class Stone:
             cond3 = self.connections[(c + 1) % NUM_OF_CONNECTIONS] == FREE_SPACE
             if cond1 and (cond2 or cond3):
                 return False
-        else:
-            return True
+        return True
 
     def basic_move(self, distance, game):
         """Return all possible basic positions(where stone could move by sliding around hive) in chosen distance
@@ -261,9 +260,9 @@ class Grasshopper(Stone):
                 possible_position = self
                 while possible_position.connections[c] != FREE_SPACE:
                     possible_position = possible_position.connections[c]
-                else:
-                    position = count_new_position(possible_position.position, c)
-                    available_moves.append(AvailMove(self, position))
+
+                position = count_new_position(possible_position.position, c)
+                available_moves.append(AvailMove(self, position))
         return available_moves
 
 
@@ -296,6 +295,7 @@ class Ant(Stone):
         Stone.__init__(self, colour, index, kind=ANT)
 
     def return_moves(self, game):
+        """Return all possible ant moves"""
         return return_basic_moves(self, distance=100, game=game)
 
 
@@ -303,9 +303,7 @@ def return_basic_moves(stone, distance, game):
     """Returns basic moves in distance received"""
 
     available_moves = []
-    if stone.is_blocked():
-        return available_moves
-    else:
+    if not stone.is_blocked():
         available_positions = stone.basic_move(distance, game)
         for position in available_positions:
             available_moves.append(AvailMove(stone, position))

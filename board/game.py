@@ -1,3 +1,5 @@
+from random import randint
+
 from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_position, NUM_OF_CONNECTIONS, BEETLE, \
                             QUEEN, GRASSHOPPER, ANT, SPIDER, count_new_position
 
@@ -7,7 +9,7 @@ from board.stones import AvailMove
 
 class Game:
     """Class representing game of Hive"""
-    def __init__(self, turn=1, size=68, board = None, placed_stones=[]):
+    def __init__(self, turn=1, size=68, board=None, placed_stones=[]):
         self.turn = turn
         self.size = size
         if board:
@@ -126,9 +128,10 @@ def is_players_queen_surrounded(player):
     """Return boolean if queen is surrounded"""
     if player.queen:
         return player.queen.connections.count(FREE_SPACE) == 0
+    return False
 
 
-def create_game(size=64, stones=[]):
+def create_game(size=64, stones=()):
     """Create game from received stones
 
     :param size: positive integer stating size of the board for the game
@@ -170,9 +173,10 @@ def find_available_moves(player, game):
         for stone in player.placed_stones:
             for c in range(NUM_OF_CONNECTIONS):
                 possible_position = count_new_position(stone.position, c)
-                if possible_position not in placing_positions:
-                    if check_placable(possible_position):
-                        placing_positions.append(possible_position)
+                condition1 = possible_position not in placing_positions
+                condition2 = check_placable(possible_position)
+                if condition1 and condition2:
+                    placing_positions.append(possible_position)
         return placing_positions
 
     def return_placing_moves():
@@ -191,7 +195,7 @@ def find_available_moves(player, game):
         else:
             position = (34, 36)
         for stone in player.available_stones:
-            if stone.kind not in [QUEEN]:
+            if stone.kind != QUEEN:
                 first_turn_moves.append(AvailMove(stone, position))
         return first_turn_moves
 
@@ -204,13 +208,17 @@ def find_available_moves(player, game):
         return queen_placed_moves
 
     def queen_not_placed():
-        """Return all possible moves if queen has not been placed, pieces cannot move and queen has to be placed if it is move 7 or 8"""
+        """
+        Return all possible moves if queen has not been placed, pieces cannot move and queen has to be placed
+        if it is move 7 or 8
+        """
         queen_not_placed_moves = []
         placing_positions = return_placing_positions()
         if game.turn == 7 or game.turn == 8:
             for stone in player.available_stones:
                 if stone.kind == QUEEN:
                     queen_not_placed_moves += stone.return_placing_moves(placing_positions)
+                    break
         else:
             for stone in player.available_stones:
                 queen_not_placed_moves += stone.return_placing_moves(placing_positions)
@@ -296,6 +304,11 @@ def make_move(game, move, player1, player2):
 
     make_connections(move.stone, game)
     game.turn += 1
+
+
+def choose_random_move(available_moves):
+    move = randint(0, len(available_moves))
+    return move
 
 
 def main():
