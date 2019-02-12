@@ -224,7 +224,6 @@ class Spider(Stone):
                 next_position = count_new_position(current_position, c)
                 next_positions.append(next_position)
         for position in next_positions:
-            print(distance)
             if distance == 0:
                 available_positions.append(position)
             else:
@@ -260,7 +259,6 @@ class Grasshopper(Stone):
                 possible_position = self
                 while possible_position.connections[c] != FREE_SPACE:
                     possible_position = possible_position.connections[c]
-
                 position = count_new_position(possible_position.position, c)
                 available_moves.append(AvailMove(self, position))
         return available_moves

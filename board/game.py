@@ -276,12 +276,17 @@ def make_move(game, move, current_player, other_player):
 
                 game.board[stone.position[0]][stone.position[1]] = stone.under
 
+                stone.under.above = False
+
+
                 make_connections(stone.under, game)
 
             def add_stone_under():
                 """Adds stone under beetle"""
                 if game.board[position[0]][position[1]] != FREE_SPACE:
                     stone.under = game.board[position[0]][position[1]]
+                    clean_connections(stone.under)
+                    stone.under.above = stone
                     if stone.under == current_player.queen:
                         current_player.queen = stone
                     elif stone.under == current_player.queen:
@@ -319,7 +324,6 @@ def make_move(game, move, current_player, other_player):
         move_stone(move.stone, move.position)
 
     make_connections(move.stone, game)
-    game.turn += 1
 
 
 def choose_random_move(available_moves):
@@ -369,13 +373,11 @@ def players_turn(game, current_player, opponent, available_moves):
 
 
 def random_turn(game, current_player, opponent, available_moves):
-    print('this is random')
     move_num = choose_random_move(available_moves)
     move = available_moves[move_num]
     make_move(game, move, current_player, opponent)
     print('Opponent moved {} to {}'.format(move.stone, move.position))
     print(game)
-
 
 def main():
     game = Game()
@@ -400,22 +402,32 @@ def main():
             break
 
     while True:
+        print('turn is', game.turn)
         if game.turn % 2 == 1:
             current_player = player1
             another_player = player2
             available_moves = find_available_moves(current_player, game)
-            random_turn(game, current_player, another_player, available_moves)
+            if not available_moves:
+                print('no moves available for player 1')
+            else:
+                random_turn(game, current_player, another_player, available_moves)
         else:
             current_player = player2
             another_player = player1
             available_moves = find_available_moves(current_player, game)
-            opponent(game, current_player, another_player, available_moves)
+            if not available_moves:
+                print('no moves available for player 2')
+            else:
+                opponent(game, current_player, another_player, available_moves)
 
         if is_game_terminal(player1, player2):
             print(game)
             print(player1.queen.position)
+            print(player1.queen.connections)
             print(player2.queen.position)
+            print(player2.queen.connections)
             break
+        game.turn += 1
 
 
 if __name__ == "__main__":
