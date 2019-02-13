@@ -157,26 +157,24 @@ def create_game(size=64, stones=()):
 
 def find_available_moves(player, game):
     def return_placing_positions():
-        def check_placable(move):
-            if game.board[move[0]][move[1]] == FREE_SPACE:
+        def check_placable(position):
+            if game.board[position[0]][position[1]] == FREE_SPACE:
                 for c in range(NUM_OF_CONNECTIONS):
-                    condition1 = check_position(game, move, c) == FREE_SPACE
-                    condition2 = check_position(game, move, c) in player.placed_stones
-                    if not (condition1 or condition2):
+                    condition1 = check_position(game, position, c) == FREE_SPACE
+                    condition2 = check_position(game, position, c) in player.placed_stones
+                    if not condition1 and not condition2:
                         return []
                 else:
-                    return move
+                    return position
             else:
                 return []
 
-        placing_positions = []
+        placing_positions = set()
         for stone in player.placed_stones:
             for c in range(NUM_OF_CONNECTIONS):
                 possible_position = count_new_position(stone.position, c)
-                condition1 = possible_position not in placing_positions
-                condition2 = check_placable(possible_position)
-                if condition1 and condition2:
-                    placing_positions.append(possible_position)
+                if check_placable(possible_position):
+                    placing_positions.add(possible_position)
         return placing_positions
 
     def return_placing_moves():
@@ -201,7 +199,10 @@ def find_available_moves(player, game):
 
     def queen_placed():
         """Return all possible moves after queen has been moved which makes pieces movable"""
-        queen_placed_moves = return_placing_moves()
+        if player.available_stones:
+            queen_placed_moves = return_placing_moves()
+        else:
+            queen_placed_moves = []
         for stone in player.placed_stones:
             if stone.is_movable():
                 queen_placed_moves += stone.return_moves(game)
@@ -277,7 +278,6 @@ def make_move(game, move, current_player, other_player):
                 game.board[stone.position[0]][stone.position[1]] = stone.under
 
                 stone.under.above = False
-
 
                 make_connections(stone.under, game)
 
