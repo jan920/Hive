@@ -1,11 +1,12 @@
 from random import randint
 
-from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_position, NUM_OF_CONNECTIONS, BEETLE, \
-                            QUEEN, GRASSHOPPER, ANT, SPIDER, count_new_position
+from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_position, \
+                          NUM_OF_CONNECTIONS, BEETLE, QUEEN, count_new_position
 
 from board.player import Player
 
 from board.stones import AvailMove
+
 
 class Game:
     """Class representing game of Hive"""
@@ -22,27 +23,28 @@ class Game:
         """Prints the board"""
         def find_first_stone_from_top():
             """Find first line which contains stone"""
-            for y in range(self.size):
-                for item in self.board[y]:
-                    if item is not PLACEHOLDER and item is not FREE_SPACE:
-                        return y
+            for y_position in range(self.size):
+                for item in self.board[y_position]:
+                    if item not in [PLACEHOLDER, FREE_SPACE]:
+                        return y_position
             return 0
 
         def find_first_stone_from_bottom():
             """Find last line which contains stone"""
-            for y in reversed(range(self.size)):
-                for item in self.board[y]:
-                    if item is not PLACEHOLDER and item is not FREE_SPACE:
-                        return y
+            for y_position in reversed(range(self.size)):
+                for item in self.board[y_position]:
+                    if item not in [PLACEHOLDER, FREE_SPACE]:
+                        return y_position
             return self.size - 1
 
         def find_first_left_right():
-            """"Find left, right most position of stone, withing area limited by top, bottom arguments received"""
+            """"Find left, right most position of stone, withing area
+            limited by top, bottom arguments received"""
             left = self.size
             right = 0
-            for y in range(top, bottom + 1):
-                for counter, item in enumerate(self.board[y]):
-                    if item is not PLACEHOLDER and item is not FREE_SPACE:
+            for y_position in range(top, bottom + 1):
+                for counter, item in enumerate(self.board[y_position]):
+                    if item not in [PLACEHOLDER, FREE_SPACE]:
                         if counter < left:
                             left = counter
                         if counter > right:
@@ -53,29 +55,29 @@ class Game:
 
         bottom = find_first_stone_from_bottom()
 
-        left, right = find_first_left_right()
+        most_left, most_right = find_first_left_right()
 
-        if left == self.size and right == 0:
+        if most_left == self.size and most_right == 0:
             res = "No stones have been placed so far"
         else:
             res = "   "
-            for x in range(left-2, right+3):
-                res += str(x)
-                if x < 10:
+            for x_position in range(most_left-2, most_right+3):
+                res += str(x_position)
+                if x_position < 10:
                     res += "  "
                 else:
                     res += " "
-            for y in range(top-1, bottom+2):
+            for y_position in range(top-1, bottom+2):
                 res += "\n"
-                res += str(y)
+                res += str(y_position)
                 res += " "
-                for x in range(left-2, right+3):
-                    if self.board[y][x] == FREE_SPACE:
-                        res += " 0 "
-                    elif self.board[y][x] == PLACEHOLDER:
-                        res += " - "
+                for x_position in range(most_left-2, most_right+3):
+                    if self.board[y_position][x_position] == FREE_SPACE:
+                        res += " {} ".format(FREE_SPACE)
+                    elif self.board[y_position][x_position] == PLACEHOLDER:
+                        res += " {} ".format(PLACEHOLDER)
                     else:
-                        res += str(self.board[y][x])
+                        res += str(self.board[y_position][x_position])
             res += "\n"
 
         return res
@@ -90,14 +92,12 @@ def is_game_terminal(player1, player2):
         if is_players_queen_surrounded(player2):
             print("its a tie")
             return True
-        else:
-            print("player 1 lost")
-            return True
-    elif is_players_queen_surrounded(player2):
+        print("player 1 lost")
+        return True
+    if is_players_queen_surrounded(player2):
         print("player 2 lost")
         return True
-    else:
-        return False
+    return False
 
 
 def create_board(size):
@@ -114,20 +114,20 @@ def create_board(size):
     """
 
     board = []
-    for y in range(size):
+    for y_position in range(size):
         board.append([])
-        for x in range(size):
-            if x % 2 == y % 2:
-                board[y].append(FREE_SPACE)
+        for x_position in range(size):
+            if x_position % 2 == y_position % 2:
+                board[y_position].append(PLACEHOLDER)
             else:
-                board[y].append(PLACEHOLDER)
+                board[y_position].append(FREE_SPACE)
     return board
 
 
 def is_players_queen_surrounded(player):
     """Return boolean if queen is surrounded"""
     if player.queen:
-        return player.queen.connections.count(FREE_SPACE) == 0
+        return player.queen.connections.count(PLACEHOLDER) == 0
     return False
 
 
@@ -158,21 +158,19 @@ def create_game(size=64, stones=()):
 def find_available_moves(player, game):
     def return_placing_positions():
         def check_placable(position):
-            if game.board[position[0]][position[1]] == FREE_SPACE:
-                for c in range(NUM_OF_CONNECTIONS):
-                    condition1 = check_position(game, position, c) == FREE_SPACE
-                    condition2 = check_position(game, position, c) in player.placed_stones
+            if game.board[position[0]][position[1]] == PLACEHOLDER:
+                for index in range(NUM_OF_CONNECTIONS):
+                    condition1 = check_position(game, position, index) == PLACEHOLDER
+                    condition2 = check_position(game, position, index) in player.placed_stones
                     if not condition1 and not condition2:
                         return []
-                else:
-                    return position
-            else:
-                return []
+                return position
+            return []
 
         placing_positions = set()
         for stone in player.placed_stones:
-            for c in range(NUM_OF_CONNECTIONS):
-                possible_position = count_new_position(stone.position, c)
+            for index in range(NUM_OF_CONNECTIONS):
+                possible_position = count_new_position(stone.position, index)
                 if check_placable(possible_position):
                     placing_positions.add(possible_position)
         return placing_positions
@@ -206,12 +204,14 @@ def find_available_moves(player, game):
         for stone in player.placed_stones:
             if stone.is_movable():
                 queen_placed_moves += stone.return_moves(game)
+
         return queen_placed_moves
 
     def queen_not_placed():
         """
-        Return all possible moves if queen has not been placed, pieces cannot move and queen has to be placed
-        if it is move 7 or 8
+        Return all possible moves if queen has not been placed,
+        pieces cannot move and queen has to be placedn if it
+        is move 7 or 8
         """
         queen_not_placed_moves = []
         placing_positions = return_placing_positions()
@@ -237,9 +237,9 @@ def find_available_moves(player, game):
 
 def make_connections(stone, game):
     """Creates all new connections for the stone according to positions around it"""
-    for c in range(NUM_OF_CONNECTIONS):
-        if check_position(game, stone.position, c) != FREE_SPACE:
-            set_new_connection(game, stone, c)
+    for count in range(NUM_OF_CONNECTIONS):
+        if check_position(game, stone.position, count) != PLACEHOLDER:
+            set_new_connection(game, stone, count)
 
 
 def make_move(game, move, current_player, other_player):
@@ -283,7 +283,7 @@ def make_move(game, move, current_player, other_player):
 
             def add_stone_under():
                 """Adds stone under beetle"""
-                if game.board[position[0]][position[1]] != FREE_SPACE:
+                if game.board[position[0]][position[1]] != PLACEHOLDER:
                     stone.under = game.board[position[0]][position[1]]
                     clean_connections(stone.under)
                     stone.under.above = stone
@@ -295,9 +295,9 @@ def make_move(game, move, current_player, other_player):
             if stone.under:
                 free_stone_under()
                 stone.under = None
-                stone.connections = [FREE_SPACE] * NUM_OF_CONNECTIONS
+                stone.connections = [PLACEHOLDER] * NUM_OF_CONNECTIONS
             else:
-                game.board[stone.position[0]][stone.position[1]] = FREE_SPACE
+                game.board[stone.position[0]][stone.position[1]] = PLACEHOLDER
                 clean_connections(stone)
 
             add_stone_under()
@@ -305,18 +305,18 @@ def make_move(game, move, current_player, other_player):
         if stone.kind == BEETLE:
             move_beetle()
         else:
-            game.board[stone.position[0]][stone.position[1]] = FREE_SPACE
+            game.board[stone.position[0]][stone.position[1]] = PLACEHOLDER
             clean_connections(stone)
         stone.position = position
         game.board[position[0]][position[1]] = stone
         make_connections(stone, game)
 
     def clean_connections(stone):
-        """Sets all connections of stone to FREE_SPACE placeholder"""
-        for c in range(NUM_OF_CONNECTIONS):
-            if stone.connections[c] != FREE_SPACE:
-                stone.connections[c].connections[(c + 3) % NUM_OF_CONNECTIONS] = FREE_SPACE
-                stone.connections[c] = FREE_SPACE
+        """Sets all connections of stone to PLACEHOLDER"""
+        for count in range(NUM_OF_CONNECTIONS):
+            if stone.connections[count] != PLACEHOLDER:
+                stone.connections[count].connections[(count + 3) % NUM_OF_CONNECTIONS] = PLACEHOLDER
+                stone.connections[count] = PLACEHOLDER
 
     if move.stone in current_player.available_stones:
         place_stone(move.stone, move.position, current_player)
@@ -327,20 +327,22 @@ def make_move(game, move, current_player, other_player):
 
 
 def choose_random_move(available_moves):
-    b = len(available_moves) - 1
-    move = randint(0, b)
+    """Choose random move from available_moves received"""
+    number_of_moves = len(available_moves) - 1
+    move = randint(0, number_of_moves)
     return move
 
 
 def ai_turn():
-    pass
+    """Perform AI turn"""
 
 
 def players_turn(game, current_player, opponent, available_moves):
+    """Perform human player's turn"""
     print("")
     print(game)
-    print("Player1 hand:", current_player.available_stones)
-    print("Player2 hand:", opponent.available_stones)
+    print(f"Player1 hand: {current_player.available_stones}")
+    print(f"Player2 hand: {opponent.available_stones}")
     print("")
     for stone in game.placed_stones:
         if stone.kind == BEETLE:
@@ -356,47 +358,50 @@ def players_turn(game, current_player, opponent, available_moves):
     print(f"{current_player} chooses a move")
 
     print("")
-    c = 0
+    move_count = 0
     for move in available_moves:
-        print(c, end=" ")
+        print(move_count, end=" ")
         print(move)
-        c += 1
+        move_count += 1
 
     while True:
         try:
             move = int(input("Choose move: "))
             make_move(game, available_moves[move], current_player, opponent)
-        except Exception as e:
+        except (ValueError, IndexError):
             print("Enter correct move")
         else:
             break
 
 
 def random_turn(game, current_player, opponent, available_moves):
+    """Function making random move"""
     move_num = choose_random_move(available_moves)
     move = available_moves[move_num]
     make_move(game, move, current_player, opponent)
     print('Opponent moved {} to {}'.format(move.stone, move.position))
-    print(game)
+
 
 def main():
+    """Function running the Hive game"""
     game = Game()
     player1 = Player("W")
     player2 = Player("B")
     opponents = [players_turn, random_turn]
-    choices = '''If you want to play game of two players enter "0", 
+    choices = '''If you want to play game of two players enter "0",
     if you want to play against random opponent enter "1",
     if you want to play against AI enter "2"
     '''
+
     while True:
         try:
             print(choices)
             choice = int(input("Choose opponent: "))
             if choice == 2:
                 print("I'm sorry but AI opponent is currently not available")
-                opponent = opponents[10]
+                raise ValueError
             opponent = opponents[choice]
-        except Exception as e:
+        except (ValueError, IndexError):
             print("Enter correct opponent")
         else:
             break
@@ -407,6 +412,7 @@ def main():
             current_player = player1
             another_player = player2
             available_moves = find_available_moves(current_player, game)
+
             if not available_moves:
                 print('no moves available for player 1')
             else:
@@ -415,6 +421,7 @@ def main():
             current_player = player2
             another_player = player1
             available_moves = find_available_moves(current_player, game)
+
             if not available_moves:
                 print('no moves available for player 2')
             else:

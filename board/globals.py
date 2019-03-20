@@ -1,4 +1,19 @@
-"""Global variables and functions shared over the whole module"""
+"""Global variables and functions shared over the whole module
+
+Attributes:
+    POSITIONS AROUND (list): list of tuples containing two integers,
+    each of the tuples signifies difference in coordinates of different
+    position around original position, first integer one is y difference
+    in coordinate second integer is x difference in coordinate
+    BEETLE (str): symbol for Beetle
+    QUEEN (str): symbol for Queen
+    SPIDER (str): symbol for Spider
+    ANT (str): symbol for Ant
+    GRASSHOPPER (str): symbol for Grasshopper
+    NUM_OF_CONNECTIONS (int): number of possible connections each stone can have
+    FREE_SPACE (str): character representing free space on board
+    PLACEHOLDER (str):
+"""
 
 
 POSITIONS_AROUND = [(-1, -1), (-1, 1), (0, 2), (1, 1), (1, -1), (0, -2)]
@@ -26,15 +41,17 @@ def check_connection(stone, count, item):
 
 
 def count_new_position(position, c):
-    """Counts new position based on original position and integer choosing one of six positions around each position"""
-    y = position[0]+POSITIONS_AROUND[c % NUM_OF_CONNECTIONS][0]
-    x = position[1]+POSITIONS_AROUND[c % NUM_OF_CONNECTIONS][1]
-    return y, x
+    """Counts new position based on original position and integer
+     choosing one of six positions around each position"""
+    y_position = position[0]+POSITIONS_AROUND[c % NUM_OF_CONNECTIONS][0]
+    x_position = position[1]+POSITIONS_AROUND[c % NUM_OF_CONNECTIONS][1]
+    return y_position, x_position
 
 
 def set_new_connection(game, stone, c):
     """
-    Set new connection for stone based on position around stone, set that if that position is stone set it's
+    Set new connection for stone based on position around
+    stone, set that if that position is stone set it's
     position equal to stone received
     """
 

@@ -4,6 +4,7 @@ sys.path.append('../Hive/')
 
 from board.game import create_board, Game
 
+
 class TestGame():
     def test_create_board_passes(self):
         print(create_board(64))

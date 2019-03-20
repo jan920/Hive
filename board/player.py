@@ -26,11 +26,14 @@ class Player:
             else:
                 self.available_stones.append(Queen(colour, 1))
 
-    def __str__(self):
+    def __repr__(self):
         if self.colour == "B":
             return "Second player"
 
         return "First player"
+
+    def __str__(self):
+        return self.__repr__()
 
 
 if __name__ == "__main__":
