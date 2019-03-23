@@ -2,12 +2,12 @@ import sys
 
 sys.path.append('../Hive/')
 
-
 from board.stones import Stone
+
 from board.globals import FREE_SPACE
 
 
-class TestMoves():
+class TestMoves:
     should_pass = []
     should_fail = []
     cases = []

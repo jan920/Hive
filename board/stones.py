@@ -25,22 +25,25 @@ class Stone:
 
     def __eq__(self, other):
         """Two stones are equal if their colour, kind and index are the same"""
-        def condition1():
-            return self.colour == other.colour
+        try:
+            def condition1():
+                return self.colour == other.colour
 
-        def condition2():
-            return self.kind == other.kind
+            def condition2():
+                return self.kind == other.kind
 
-        def condition3():
-            return self.index == other.index
+            def condition3():
+                return self.index == other.index
 
-        if isinstance(other, str):
+            if isinstance(other, str):
+                return False
+
+            if condition1() and condition2() and condition3():
+                return True
+
             return False
-
-        if condition1() and condition2() and condition3():
-            return True
-
-        return False
+        except AttributeError:
+            return False
 
     def add_connection(self, position, connection):
         """Add new connection for self

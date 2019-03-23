@@ -57,7 +57,7 @@ def set_new_connection(game, stone, c):
 
     position = count_new_position(stone.position, c)
     game.board[position[0]][position[1]].connections[(c+3) % NUM_OF_CONNECTIONS] = stone
-    stone.connections[c] = game.board[position[0]][position[1]]
+    stone.connections[c % NUM_OF_CONNECTIONS] = game.board[position[0]][position[1]]
 
 
 def check_position(game, position, c):
