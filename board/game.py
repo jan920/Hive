@@ -5,7 +5,7 @@ from board.globals import FREE_SPACE, PLACEHOLDER, set_new_connection, check_pos
 
 from board.player import Player
 
-from board.stones import AvailMove
+from board.available_move import AvailMove
 
 
 class Game:

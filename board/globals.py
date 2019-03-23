@@ -11,8 +11,8 @@ Attributes:
     ANT (str): symbol for Ant
     GRASSHOPPER (str): symbol for Grasshopper
     NUM_OF_CONNECTIONS (int): number of possible connections each stone can have
-    FREE_SPACE (str): character representing free space on board
-    PLACEHOLDER (str):
+    FREE_SPACE (str): character representing free space on board which cannot be ocupied
+    PLACEHOLDER (str): character representing placeholder which can be replaced by stone
 """
 
 
